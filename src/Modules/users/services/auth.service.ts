@@ -1,15 +1,16 @@
 import { NextFunction, Request, Response } from "express";
 import { IOTP, IUser, OtpTypesEnum } from "../../../common";
-import { userModel } from "../../../DB/model";
+import { blackListedTokenModel, userModel } from "../../../DB/model";
 import { UserRepository } from "../../../DB/Repositories";
 import { CompareHash, encrypt, generateHash } from '../../../utils'
 import { customAlphabet } from "nanoid";
 import { localEmmiter } from "../../../utils/Encrypt/services/email.utils";
 import { generateToken } from "../../../utils/Encrypt/token.utils";
+import { BlackListedTokenRepo } from "../../../DB/Repositories/black-listed-token.repo";
 const generateOtp = customAlphabet('0123456789', 6)
 class AuthService {
   private userRepo: UserRepository = new UserRepository(userModel);
-
+  private blackListedRepo: BlackListedTokenRepo = new BlackListedTokenRepo(blackListedTokenModel)
   signup = async (req: Request, res: Response) => {
     const {
       firstName,
@@ -78,10 +79,21 @@ class AuthService {
       { isVerified: true }
     )
 
-    return res.status(201).json({ message:"your email is verified Now " })
+    return res.status(201).json({ message: "your email is verified Now " })
 
   }
-
+  logout = async (req: Request, res: Response) => {
+    const token = req.loggedUser
+    const blackListedToken = await this.blackListedRepo.createOneDocument({
+      tokenId: token?.token.jti,
+      expiresAt: token?.token.exp
+        ? new Date(token.token.exp)
+        : new Date(Date.now() + 60000)
+    });
+    console.log({blackListedToken});
+    
+    return res.status(200).json({ message: `you logged out successfully`, data: blackListedToken })
+  }
 }
 
 export default new AuthService()

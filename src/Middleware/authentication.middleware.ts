@@ -13,18 +13,22 @@ export const authentication = async (req: Request, res: Response, next: NextFunc
     if (!accessToken) {
         return res.status(401).json({ message: "log in first" })
     }
+
     const [prefix, Token] = accessToken.split(' ')
+
     if (prefix != 'bearer') {
         return res.status(401).json({ message: "invalid token" })
     }
     console.log("true");
+
     const decodedData = verifyToken(Token)
+
     if (!decodedData.id) {
         return res.status(401).json({ message: "in-valid payload" })
     }
-    
-    
+
     const blackListedToken = await blackListRepo.findOneDocuments({ tokenId: decodedData.jti })
+
     if (blackListedToken) {
         return res.status(401).json({ message: "Session is Expired please login again !" })
     }
