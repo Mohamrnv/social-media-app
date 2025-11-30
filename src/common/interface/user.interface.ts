@@ -1,8 +1,9 @@
 import { Request } from "express";
-import { RoleEnum,GenderEnum,ProviderEnum, OtpTypesEnum } from "../enums/user.enum";
+import { RoleEnum, GenderEnum, ProviderEnum, OtpTypesEnum } from "../enums/user.enum";
 import { JwtPayload } from "jsonwebtoken";
-import mongoose from "mongoose";
-declare module "express-serve-static-core" {
+import { Types, Document } from "mongoose";
+
+declare module "express" {
   interface Request {
     loggedUser?: {
       user: IUser;
@@ -10,13 +11,15 @@ declare module "express-serve-static-core" {
     };
   }
 }
-interface IOTP{
-  value:string,
-  expiresAt:Date,
-  otpType:OtpTypesEnum
-}
-  interface IUser extends Document {
 
+interface IOTP {
+  value: string;
+  expiresAt: Date;
+  otpType: OtpTypesEnum;
+}
+
+interface IUser extends Document {
+  _id: Types.ObjectId;
   firstName: string;
   lastName: string;
   email: string;
@@ -28,22 +31,24 @@ interface IOTP{
   password: string;
   age: number;
   phoneNumber?: string;
-  isVerified?:boolean
-  gender?:GenderEnum
-  googleId?:string
-  verifiedAt?:string;
-  OTPS?: IOTP []
+  isVerified?: boolean;
+  gender?: GenderEnum;
+  googleId?: string;
+  verifiedAt?: string;
+  OTPS?: IOTP[];
 }
-interface IBlackListedToken extends Document
-{
-  tokenId:string,
-  expiresAt:Date
+
+interface IBlackListedToken extends Document {
+  tokenId: string;
+  expiresAt: Date;
 }
-interface IEmailArguments{
-    to:string,
-    cc?:string,
-    subject:string,
-    content:string,
-    attachments?:[]  
+
+interface IEmailArguments {
+  to: string;
+  cc?: string;
+  subject: string;
+  content: string;
+  attachments?: [];
 }
-export {IUser,IEmailArguments,IOTP,Request,IBlackListedToken}
+
+export { IUser, IEmailArguments, IOTP, Request, IBlackListedToken };

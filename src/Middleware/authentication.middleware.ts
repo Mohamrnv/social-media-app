@@ -6,12 +6,14 @@ import { JwtPayload } from "jsonwebtoken";
 import { blackListedTokenModel } from "../DB/model/blackl-listed-token";
 import { IBlackListedToken } from "../common";
 import { BlackListedTokenRepo } from "../DB/Repositories/black-listed-token.repo";
+import { HttpException } from "../utils";
+import { BadRequestException } from "../utils/Error/exceptions.utils";
 const userRepo = new UserRepository(userModel)
 const blackListRepo = new BlackListedTokenRepo(blackListedTokenModel)
 export const authentication = async (req: Request, res: Response, next: NextFunction) => {
     const { authorization: accessToken } = req.headers
     if (!accessToken) {
-        return res.status(401).json({ message: "log in first" })
+       throw next(new BadRequestException("please log in first"))
     }
 
     const [prefix, Token] = accessToken.split(' ')
@@ -27,11 +29,14 @@ export const authentication = async (req: Request, res: Response, next: NextFunc
         return res.status(401).json({ message: "in-valid payload" })
     }
 
-    const blackListedToken = await blackListRepo.findOneDocuments({ tokenId: decodedData.jti })
+    const isSessionEnded = await blackListedTokenModel.findOne({
+        tokenId: decodedData.jti
+    });
 
-    if (blackListedToken) {
-        return res.status(401).json({ message: "Session is Expired please login again !" })
+    if (isSessionEnded) {
+        throw new BadRequestException("your session is ended")
     }
+
     const user = await userRepo.findDocumentById(decodedData.id, '-password')
     if (!user) {
         return res.status(404).json({ message: "please signUp first" })

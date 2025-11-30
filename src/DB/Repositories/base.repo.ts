@@ -1,6 +1,5 @@
 import mongoose, { FilterQuery, Model, PopulateOption, ProjectionType, QueryOptions, UpdateQuery } from "mongoose";
 export abstract class BaseRepository<T> {
-
   constructor(private model: Model<T>) { }
 
   async createOneDocument(document: Partial<T>): Promise<T> {
@@ -35,7 +34,7 @@ export abstract class BaseRepository<T> {
         ...options, 
       });
       return updatedDoc;
-    } catch (error) {
+    } catch (error) { 
       console.error("Error in findAndUpdateDocument:", error);
       throw error;
     }

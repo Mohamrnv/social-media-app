@@ -1,12 +1,13 @@
 import { NextFunction, Request, Response } from "express";
-import { IOTP, IUser, OtpTypesEnum } from "../../../common";
-import { blackListedTokenModel, userModel } from "../../../DB/model";
-import { UserRepository } from "../../../DB/Repositories";
-import { CompareHash, encrypt, generateHash } from '../../../utils'
+import { IOTP, IUser, OtpTypesEnum } from "../../common";
+import { blackListedTokenModel, userModel } from "../../DB/model";
+import { UserRepository } from "../../DB/Repositories";
+import { CompareHash, encrypt, generateHash } from '..'
 import { customAlphabet } from "nanoid";
-import { localEmmiter } from "../../../utils/Encrypt/services/email.utils";
-import { generateToken } from "../../../utils/Encrypt/token.utils";
-import { BlackListedTokenRepo } from "../../../DB/Repositories/black-listed-token.repo";
+import { localEmmiter } from "../Encrypt/services/email.utils";
+import { generateToken } from "../Encrypt/token.utils";
+import { BlackListedTokenRepo } from "../../DB/Repositories/black-listed-token.repo";
+import { ConflictException } from "../Error/exceptions.utils";
 const generateOtp = customAlphabet('0123456789', 6)
 class AuthService {
   private userRepo: UserRepository = new UserRepository(userModel);
@@ -27,7 +28,7 @@ class AuthService {
       "email"
     );
     if (isEmailExist)
-      return res.status(409).json({ message: "Email Already Exist" });
+      throw new ConflictException("Email Already Exist",{invalidEmail:email})
 
     const encPhone = encrypt(phoneNumber as string)
     const hashPass = generateHash(password as string)

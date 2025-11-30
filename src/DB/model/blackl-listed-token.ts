@@ -8,7 +8,8 @@ tokenId:{
 expiresAt:{
     type:Date,
     required:true
-}}
+}
+}
 )
 const blackListedTokenModel=mongoose.model<IBlackListedToken>("blackListedtToken",blackListedtTokenSchema)
 export {blackListedTokenModel}
