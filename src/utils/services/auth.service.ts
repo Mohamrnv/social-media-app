@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from "express";
-import { IOTP, IUser, OtpTypesEnum } from "../../common";
+import { IOTP, IUser, OtpTypesEnum, signupBodyType } from "../../common";
 import { blackListedTokenModel, userModel } from "../../DB/model";
 import { UserRepository } from "../../DB/Repositories";
 import { CompareHash, encrypt, generateHash } from '..'
@@ -22,7 +22,8 @@ class AuthService {
       phoneNumber,
       role,
       DOB,
-    }: Partial<IUser> = req.body;
+      passwordConfirmation
+    }: signupBodyType = req.body;
     const isEmailExist = await this.userRepo.findOneDocuments(
       { email },
       "email"

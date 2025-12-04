@@ -26,7 +26,15 @@ export class ProfileServices {
         return res.status(500).json({ message: error.message || "something went wrong" });
     }
 };
+renewSignedUrl = async (req: Request, res: Response) => {
+     const { user } = req.loggedUser!
+    const { key, keyType }: { key: string, keyType: 'profilePicture' | 'coverPicture' } = req.body
 
+    if(user[keyType] !== key) throw new BadRequestException('Invalid key')
+
+    const url = await this.s3Client.getFileWithSignedUrl(key)
+     res.status(200).json({message:'Signed url renewed successfully'})
+}
 }
 
 export default new ProfileServices();
